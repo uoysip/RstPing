@@ -1,13 +1,13 @@
 # ping-util-rs
 
-This program is a Rust implementation of the ping command found in UNIX. Supporting IPv4, IPv6. 
+This program is a Rust implementation of the ping command found in UNIX.
 
 ## Roadmap
 
 - [x] Argument parsing
 - [x] Add support for both IPv4 and IPv6
 - [x] Allow to set TTL as an argument
-- [ ] Send ICMP echo requests in an infinite loop to the target whiile receiving echo reply message (have a periodic delay)
+- [ ] Send ICMP echo requests in an infinite loop to the target while receiving echo reply message (have a periodic delay)
 - [ ] Report Loss and RTT time for each sent message
 - [ ] report the ICMP messages that are exceeding the time set by the TTL argument
 - [ ] Implement any interesting arguments in the UNIX ping command
