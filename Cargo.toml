@@ -5,7 +5,10 @@ authors = ["Dishon Merkhai <merkhai@dishon.ca>"]
 edition = "2018"
 
 [dependencies]
-structopt = "0.3.13"
 lazy_static = "1.4.0"
-failure = "0.1.7"
-smoltcp = "0.6.0"
+structopt = "0.3.13"
+log = "0.4.8"
+env_logger = "0.7.1"
+fastping-rs = "0.1.5"
+# failure = "0.1.7"
+# smoltcp = "0.6.0"
