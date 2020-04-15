@@ -2,7 +2,7 @@ use structopt::StructOpt;
 use std::net::{IpAddr};
 
 #[derive(StructOpt, Debug)]
-#[structopt(name = "Ping", author = "Dishon Merkhai", no_version, about = "This program is a Rust implementation of the UNIX ping command")]
+#[structopt(name = "ping-util-rs", author = "Dishon Merkhai", no_version, about = "This program is a Rust implementation of the UNIX ping command")]
 struct Opt {
   // Activate debug mode
   #[structopt(short, long, help ="Activate debug mode")]
