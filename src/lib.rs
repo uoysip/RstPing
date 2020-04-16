@@ -7,7 +7,7 @@ use pnet::transport::{TransportSender, TransportReceiver};
 use pnet::transport::TransportChannelType::Layer4;
 use pnet::transport::TransportProtocol::{Ipv4, Ipv6};
 use std::net::{IpAddr};
-use ::ping::{send_pings};
+use crate::ping::{send_pings};
 use std::time::{Duration, Instant};
 use std::collections::BTreeMap;
 use std::sync::mpsc::{channel, Sender, Receiver};

@@ -11,7 +11,7 @@ use std::time::{Duration, Instant};
 use std::collections::BTreeMap;
 use std::sync::mpsc::{ Sender, Receiver};
 use std::sync::{Arc, Mutex, RwLock};
-use ::PingResult;
+use crate::PingResult;
 
 fn send_echo(tx: &mut TransportSender, addr: IpAddr) -> Result<usize, std::io::Error> {
     // Allocate enough space for a new packet
