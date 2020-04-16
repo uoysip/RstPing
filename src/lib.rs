@@ -244,6 +244,10 @@ impl Pinger {
             }
         });
     }
+
+    pub fn get_size(&self) -> i32 {
+        return self.size;
+    }
 }
 
 #[cfg(test)]

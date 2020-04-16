@@ -30,7 +30,7 @@ fn main() {
 
     // experimental implementation provided by fastping_rs documentation
     env_logger::init();
-    let (pinger, results) = match ping_util_rs::Pinger::new(None, None) {
+    let (pinger, results) = match ping_util_rs::Pinger::new(None, Some(64)) {
         Ok((pinger, results)) => (pinger, results),
         Err(e) => panic!("Error creating pinger: {}", e)
     };
@@ -38,6 +38,7 @@ fn main() {
 
     pinger.add_ipaddr(&opt.ip.to_string());
     pinger.run_pinger();
+    let send_size: i32 = pinger.get_size();
 
     loop {
       println!("Looping...");
@@ -48,7 +49,7 @@ fn main() {
                         log::error!("Idle Address {}.", addr);
                     },
                     ping_util_rs::PingResult::Receive{addr, rtt} => {
-                        println!("Receive from Address {} in {:?}.", addr, rtt);
+                        println!("{} bytes received from Address {} in {:?}.", send_size, addr, rtt);
                     }
                 }
             },

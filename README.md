@@ -7,6 +7,7 @@ This program is a Rust implementation of the ping command found in UNIX.
 - [x] Argument parsing
 - [x] Add support for both IPv4 and IPv6
 - [x] Allow to set TTL as an argument
+- [x] Support size of payload (in bytes) setting 
 - [ ] Send ICMP echo requests in an infinite loop to the target while receiving echo reply message (have a periodic delay)
 - [ ] Report Loss and RTT time for each sent message
 - [ ] report the ICMP messages that are exceeding the time set by the TTL argument
