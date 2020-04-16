@@ -63,7 +63,7 @@ pub fn send_pings(timer: Arc<RwLock<Instant>>,
               } else {
                   Ok(0)
               } {
-                  Err(e) => error!("Failed to send ping to {:?}: {}", *addr, e),
+                  Err(e) => log::error!("Failed to send ping to {:?}: {}", *addr, e),
                   _ => {}
               }
               *seen = false;
@@ -87,7 +87,7 @@ pub fn send_pings(timer: Arc<RwLock<Instant>>,
                                       Ok(_) => {},
                                       Err(e) => {
                                           if !*stop.lock().unwrap() {
-                                              error!("Error sending ping result on channel: {}", e)
+                                              log::error!("Error sending ping result on channel: {}", e)
                                           }
                                       }
                                   }
@@ -113,7 +113,7 @@ pub fn send_pings(timer: Arc<RwLock<Instant>>,
                       Ok(_) => {},
                       Err(e) => {
                           if !*stop.lock().unwrap() {
-                              error!("Error sending ping Idle result on channel: {}", e)
+                              log::error!("Error sending ping Idle result on channel: {}", e)
                           }
                       }
                   }

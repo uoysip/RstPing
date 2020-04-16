@@ -1,12 +1,6 @@
 use structopt::StructOpt;
 use std::net::{IpAddr};
 
-// experimental
-use fastping_rs::Pinger;
-use fastping_rs::PingResult::{Idle, Receive};
-#[macro_use]
-extern crate log;
-
 #[derive(StructOpt, Debug)]
 #[structopt(name = "ping-util-rs", author = "Dishon Merkhai", no_version, about = "This program is a Rust implementation of the UNIX ping command")]
 struct Opt {

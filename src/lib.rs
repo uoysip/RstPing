@@ -1,9 +1,3 @@
-extern crate pnet;
-extern crate pnet_macros_support;
-#[macro_use]
-extern crate log;
-extern crate rand;
-
 mod ping;
 
 use pnet::packet::ip::IpNextHeaderProtocols;
@@ -120,11 +114,11 @@ impl Pinger {
         let addr = ipaddr.parse::<IpAddr>();
         match addr {
             Ok(valid_addr) => {
-                debug!("Address added {}", valid_addr);
+                log::debug!("Address added {}", valid_addr);
                 self.addrs.lock().unwrap().insert(valid_addr, true);
             }
             Err(e) => {
-                error!("Error adding ip address {}. Error: {}", ipaddr, e);
+                log::error!("Error adding ip address {}. Error: {}", ipaddr, e);
             },
         };
     }
@@ -134,11 +128,11 @@ impl Pinger {
         let addr = ipaddr.parse::<IpAddr>();
         match addr {
             Ok(valid_addr) => {
-                debug!("Address removed {}", valid_addr);
+                log::debug!("Address removed {}", valid_addr);
                 self.addrs.lock().unwrap().remove(&valid_addr);
             }
             Err(e) => {
-                error!("Error removing ip address {}. Error: {}", ipaddr, e);
+                log::error!("Error removing ip address {}. Error: {}", ipaddr, e);
             },
         };
     }
@@ -173,7 +167,7 @@ impl Pinger {
         {
             let mut stop = self.stop.lock().unwrap();
             if run_once {
-                debug!("Running pinger for one round");
+                log::debug!("Running pinger for one round");
                 *stop = true;
             } else {
                 *stop = false;
@@ -209,13 +203,13 @@ impl Pinger {
                             Ok(_) => {},
                             Err(e) => {
                                 if !*stop.lock().unwrap() {
-                                    error!("Error sending ping result on channel: {}", e)
+                                    log::error!("Error sending ping result on channel: {}", e)
                                 }
                             }
                         }
                     },
                     Err(e) => {
-                        error!("An error occurred while reading: {}", e);
+                        log::error!("An error occurred while reading: {}", e);
                     }
                 }
             }
@@ -238,13 +232,13 @@ impl Pinger {
                             Ok(_) => {},
                             Err(e) => {
                                 if !*stopv6.lock().unwrap() {
-                                    error!("Error sending ping result on channel: {}", e)
+                                    log::error!("Error sending ping result on channel: {}", e)
                                 }
                             }
                         }
                     },
                     Err(e) => {
-                        error!("An error occurred while reading: {}", e);
+                        log::error!("An error occurred while reading: {}", e);
                     }
                 }
             }
