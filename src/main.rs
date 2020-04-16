@@ -30,7 +30,7 @@ fn main() {
 
     // experimental implementation provided by fastping_rs documentation
     env_logger::init();
-    let (pinger, results) = match Pinger::new(None, None) {
+    let (pinger, results) = match ping_util_rs::Pinger::new(None, None) {
         Ok((pinger, results)) => (pinger, results),
         Err(e) => panic!("Error creating pinger: {}", e)
     };
@@ -44,10 +44,10 @@ fn main() {
         match results.recv() {
             Ok(result) => {
                 match result {
-                    Idle{addr} => {
-                        error!("Idle Address {}.", addr);
+                    ping_util_rs::PingResult::Idle{addr} => {
+                        log::error!("Idle Address {}.", addr);
                     },
-                    Receive{addr, rtt} => {
+                    ping_util_rs::PingResult::Receive{addr, rtt} => {
                         println!("Receive from Address {} in {:?}.", addr, rtt);
                     }
                 }
