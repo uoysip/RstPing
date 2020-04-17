@@ -3,7 +3,7 @@ use std::net::{IpAddr};
 
 // Argument parsing with structopt
 #[derive(StructOpt, Debug)]
-#[structopt(name = "Ping Utility (Rust)", author = "Dishon Merkhai", no_version, about = "This program is a Rust implementation of the UNIX ping command")]
+#[structopt(name = "RstPing", author = "Dishon Merkhai", no_version, about = "This program is a Rust implementation of the UNIX ping command")]
 
 pub struct Opt {
   #[structopt(required = true, help = "The IP address (IPv4, IPv6) to send packets towards")]
@@ -67,7 +67,7 @@ fn main() {
   log::debug!("{:#?}", opt);
 
   // initialize Pinger device
-  let (pinger, results) = match ping_util_rs::Pinger::new(Some(opt.wait_time), Some(opt.packet_size), Some(opt.ttl), opt.ip.is_ipv4()) {
+  let (pinger, results) = match rst_ping::Pinger::new(Some(opt.wait_time), Some(opt.packet_size), Some(opt.ttl), opt.ip.is_ipv4()) {
       Ok((pinger, results)) => (pinger, results),
       Err(e) => panic!("Error creating pinger: {}", e)
   };
@@ -91,12 +91,12 @@ fn main() {
             icmp_seq += 1;
             match result {
                 // case: no response from the IP address
-                ping_util_rs::PingResult::Idle{addr} => {
+                rst_ping::PingResult::Idle{addr} => {
                     log::error!("TTL Time Exceeded from {}: icmp_seq={} payload={}B", addr, icmp_seq, send_size);
                     failed_packets += 1;
                 },
                 // case: response received from the IP address
-                ping_util_rs::PingResult::Receive{addr, rtt} => {
+                rst_ping::PingResult::Receive{addr, rtt} => {
                     println!("{} bytes from {}: icmp_seq={} ttl={} rtt={:.5?} loss={}%", send_size, addr, icmp_seq, opt.ttl, rtt, ((failed_packets/icmp_seq)*100));
                     rtt_vec.push(rtt.as_secs_f32() * 1000 as f32);
                 }

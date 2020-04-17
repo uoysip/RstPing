@@ -1,6 +1,6 @@
 [package]
-name = "ping-util-rs"
-version = "0.4.0"
+name = "rst_ping"
+version = "0.4.1"
 authors = ["Dishon Merkhai <merkhai@dishon.ca>"]
 edition = "2018"
 

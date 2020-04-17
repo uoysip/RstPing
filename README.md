@@ -1,8 +1,41 @@
-# ping-util-rs
+# RstPing
 
-This program is a Rust implementation of the ping command found in UNIX.
+RstPing is a highly performant CLI ping utility meant to offer similar functionality to the UNIX `ping` command. This program was developed for the 2020 [Cloudflare Internship Application: Systems challenge](https://github.com/cloudflare-internship-2020/internship-application-systems).
 
-## Roadmap
+## Installation
+
+A release-optimized executable is avaiable on the [releases page](https://github.com/uoysip/ping-util-rs/releases), as well as source code for the latest version. If you would like to build the latest version yourself, follow the commands below:
+
+```bash
+git clone https://github.com/uoysip/RstPing.git
+cd ./RstPing/
+sudo cargo run -- --help
+```
+
+## Usage
+
+```
+USAGE:
+    rst_ping [OPTIONS] <ip> <ttl>
+
+FLAGS:
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -c, --count <max-packets>    Terminates after sending (and receiving) `count` ECHO_RESPONSE packets [default: -1]
+    -s <packet-size>             Specify the number of data bytes to be sent.  The default is 56,
+                                              which translates into 64 ICMP data bytes when combined with the 8
+                                              bytes of ICMP header data. [default: 56]
+    -i, --rtt <wait-time>        Wait `wait_time` milliseconds between sending each packet. [default: 1000]
+
+ARGS:
+    <ip>     The IP address (IPv4, IPv6) to send packets towards
+    <ttl>    Set Time to live (TTL) and report packets that have exceeded the TTL [default: 255]
+```
+
+
+## Features
 
 - [x] Argument parsing
 - [x] Support IPv4 and IPv6
@@ -18,3 +51,11 @@ This program is a Rust implementation of the ping command found in UNIX.
 - [x] Implement `-i max_rtt` argument (duration between sending packets)
 - [x] Implement ping summary (for --count argument)
 - [ ] Implement ping summary for SIGINT signal
+
+## Credits
+
+Credits to [bparli](https://github.com/bparli) for his ICMP ping library.
+
+## License
+
+This project is released under the MIT license, see the LICENSE file for details.
