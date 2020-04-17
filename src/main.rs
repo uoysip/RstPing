@@ -48,20 +48,22 @@ fn main() {
   // add 8 for the ICMP header size (8 bytes)
   let send_size: i32 = pinger.get_size() + 8;
 
-  let mut icmp_seq: i32 = 0;
+  let mut icmp_seq: u32 = 0;
+  let mut failed_packets: u32 = 0;
 
   println!("PING {} ({}): {} data bytes", opt.ip, opt.ip, pinger.get_size());
 
   loop {
-    icmp_seq += 1;
       match results.recv() {
           Ok(result) => {
+              icmp_seq += 1;
               match result {
                   ping_util_rs::PingResult::Idle{addr} => {
                       log::error!("TTL Time Exceeded from {}: icmp_seq={} payload={}B", addr, icmp_seq, send_size);
+                      failed_packets += 1;
                   },
                   ping_util_rs::PingResult::Receive{addr, rtt} => {
-                      println!("{} bytes from {}: icmp_seq={} ttl={} rtt={:?}.", send_size, addr, icmp_seq, opt.ttl, rtt);
+                      println!("{} bytes from {}: icmp_seq={} ttl={} rtt={:?} loss={}%", send_size, addr, icmp_seq, opt.ttl, rtt, ((failed_packets/icmp_seq)*100));
                   }
               }
           },
