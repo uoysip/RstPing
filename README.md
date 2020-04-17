@@ -2,7 +2,7 @@
 
 RstPing is a highly performant CLI ping utility meant to offer similar functionality to the UNIX `ping` command. This program was developed for the 2020 [Cloudflare Internship Application: Systems challenge](https://github.com/cloudflare-internship-2020/internship-application-systems).
 
-![RstPing CLI](https://i.imgur.com/A0V6y2y.png)
+![RstPing CLI](https://i.imgur.com/qNBiKbA.png)
 
 ## Installation
 
