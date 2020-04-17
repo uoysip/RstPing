@@ -21,6 +21,13 @@ struct Opt {
   // Terminate after sending (and receiving) count ECHO_RESPONSE packets.
   #[structopt(short = "c", long = "count", default_value = "-1", help = "Terminates after sending (and receiving) count ECHO_RESPONSE packets")]
   max_packets: i32,
+
+  #[structopt(short = "s", default_value = "56", help = "Specify the number of data bytes to be sent.  The default is 56,
+             which translates into 64 ICMP data bytes when combined with the 8
+             bytes of ICMP header data.  This option cannot be used with ping
+             sweeps.")]
+  packet_size: i32, // TODO: should be u32, but the library implementation has i32
+
 }
 
 
@@ -28,40 +35,39 @@ fn main() {
   let opt = Opt::from_args();
   println!("{:#?}", opt);
 
-    // experimental implementation provided by fastping_rs documentation
-    env_logger::init();
-    let (pinger, results) = match ping_util_rs::Pinger::new(None, Some(16), Some(opt.ttl), opt.ip.is_ipv4()) {
-        Ok((pinger, results)) => (pinger, results),
-        Err(e) => panic!("Error creating pinger: {}", e)
-    };
+  // experimental implementation provided by fastping_rs documentation
+  env_logger::init();
+  let (pinger, results) = match ping_util_rs::Pinger::new(None, Some(opt.packet_size), Some(opt.ttl), opt.ip.is_ipv4()) {
+      Ok((pinger, results)) => (pinger, results),
+      Err(e) => panic!("Error creating pinger: {}", e)
+  };
 
 
-    pinger.add_ipaddr(&opt.ip.to_string());
-    pinger.run_pinger();
-    // add 8 for the ICMP header size (8 bytes)
-    let send_size: i32 = pinger.get_size() + 8;
+  pinger.add_ipaddr(&opt.ip.to_string());
+  pinger.run_pinger();
+  // add 8 for the ICMP header size (8 bytes)
+  let send_size: i32 = pinger.get_size() + 8;
 
-    let mut icmp_seq: i32 = 0;
-    
-    println!("PING {} ({}): {} data bytes", opt.ip, opt.ip, pinger.get_size());
-    
-    loop {
-      // println!("Looping...");
-      icmp_seq += 1;
-        match results.recv() {
-            Ok(result) => {
-                match result {
-                    ping_util_rs::PingResult::Idle{addr} => {
-                        log::error!("TTL Time Exceeded from {}: icmp_seq={} payload={}B", addr, icmp_seq, send_size);
-                    },
-                    ping_util_rs::PingResult::Receive{addr, rtt} => {
-                        println!("{} bytes from {}: icmp_seq={} ttl={} rtt={:?}.", send_size, addr, icmp_seq, opt.ttl, rtt);
-                    }
-                }
-            },
-            Err(_) => panic!("Worker threads disconnected before the solution was found!"),
-        }
-    }
+  let mut icmp_seq: i32 = 0;
+
+  println!("PING {} ({}): {} data bytes", opt.ip, opt.ip, pinger.get_size());
+
+  loop {
+    icmp_seq += 1;
+      match results.recv() {
+          Ok(result) => {
+              match result {
+                  ping_util_rs::PingResult::Idle{addr} => {
+                      log::error!("TTL Time Exceeded from {}: icmp_seq={} payload={}B", addr, icmp_seq, send_size);
+                  },
+                  ping_util_rs::PingResult::Receive{addr, rtt} => {
+                      println!("{} bytes from {}: icmp_seq={} ttl={} rtt={:?}.", send_size, addr, icmp_seq, opt.ttl, rtt);
+                  }
+              }
+          },
+          Err(_) => panic!("Worker threads disconnected before the solution was found!"),
+      }
+  }
 
 
 }

@@ -12,6 +12,7 @@ This program is a Rust implementation of the ping command found in UNIX.
 - [x] Report RTT time for each sent message
 - [x] Support TTL (IPv4, IPv6)
 - [x] Report the ICMP messages that are exceeding the time set by the TTL argument
+- [x] Implement -s argument (specify number of data bytes sent)
 = [ ] Report Loss for each sent message
 - [ ] Implement any interesting arguments in the UNIX ping command
     - [ ] Implement -c count (stop after sending (and receiving) count ECHO_RESPONSE packets.)
