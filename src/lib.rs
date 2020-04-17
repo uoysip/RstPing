@@ -82,13 +82,18 @@ impl Pinger {
             Err(e) => return Err(e.to_string()),
         };
 
-        // TODO: Make the successful catch-all match a debug statement instead of a println!
-        // TODO: CATCH ERRORS WHEN SETTING TTL (ipv4, ipv6)
+        // set TTL for ICMPv4 or ICMPv6 packets
         if let Some(ttl_value) = _ttl {
             if _ipv4_type {
-                tx.set_ttl(ttl_value);
+                match tx.set_ttl(ttl_value) {
+                    Ok(_) => log::debug!("Set IPv4 TTL to {}", ttl_value),
+                    Err(_e) => log::error!("Error: {}", _e),
+                }
             } else {
-                txv6.set_ttl(ttl_value);
+                match txv6.set_ttl(ttl_value) {
+                    Ok(_) => log::debug!("Set IPv6 TTL to {}", ttl_value),
+                    Err(_e) => log::error!("Error: {}", _e),
+                }
             }
         }
 
@@ -108,10 +113,14 @@ impl Pinger {
             timer: Arc::new(RwLock::new(Instant::now())),
             stop: Arc::new(Mutex::new(false)),
         };
-        
+
+        // set the max round-trip time (RTT) between packets
         if let Some(rtt_value) = _max_rtt {
             pinger.max_rtt = Arc::new(Duration::from_millis(rtt_value));
         }
+
+        // set the size for each packet
+        // the actual size of the packet that is sent is is actually 8 bytes higher than pinger.size because the ICMP header is 8 bytes
         if let Some(size_value) = _size {
             pinger.size = size_value;
         }
@@ -256,6 +265,8 @@ impl Pinger {
         });
     }
 
+    // getter for the packet size
+    // 8 bytes from the ICMP header not included in the return value
     pub fn get_size(&self) -> i32 {
         return self.size;
     }
