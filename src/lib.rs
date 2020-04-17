@@ -91,11 +91,11 @@ impl Pinger {
                 txv6.set_ttl(ttl_value);
             }
         }
-        
+
         let (thread_tx, thread_rx) = channel();
 
         let mut pinger = Pinger{
-            max_rtt: Arc::new(Duration::from_millis(2000)),
+            max_rtt: Arc::new(Duration::from_millis(1000)),
             addrs: Arc::new(Mutex::new(addrs)),
             size: 16,
             results_sender: sender,
@@ -108,6 +108,7 @@ impl Pinger {
             timer: Arc::new(RwLock::new(Instant::now())),
             stop: Arc::new(Mutex::new(false)),
         };
+        
         if let Some(rtt_value) = _max_rtt {
             pinger.max_rtt = Arc::new(Duration::from_millis(rtt_value));
         }
