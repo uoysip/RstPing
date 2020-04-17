@@ -16,4 +16,5 @@ This program is a Rust implementation of the ping command found in UNIX.
 - [x] Report Loss for each sent message
 - [x] Implement `-c count` argument(stop after sending (and receiving) count ECHO_RESPONSE packets.)
 - [x] Implement `-i max_rtt` argument (duration between sending packets)
-- [ ] Implement ping summary
+- [x] Implement ping summary (for --count argument)
+- [ ] Implement ping summary for SIGINT signal
