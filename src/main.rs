@@ -63,7 +63,7 @@ fn main() {
                       failed_packets += 1;
                   },
                   ping_util_rs::PingResult::Receive{addr, rtt} => {
-                      println!("{} bytes from {}: icmp_seq={} ttl={} rtt={:?} loss={}%", send_size, addr, icmp_seq, opt.ttl, rtt, ((failed_packets/icmp_seq)*100));
+                      println!("{} bytes from {}: icmp_seq={} ttl={} rtt={:.5?} loss={}%", send_size, addr, icmp_seq, opt.ttl, rtt, ((failed_packets/icmp_seq)*100));
                   }
               }
           },
