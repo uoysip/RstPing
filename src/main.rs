@@ -15,8 +15,8 @@ struct Opt {
 
   // Specify TTL (Time-To-Live), reports ICMP messages that have exceeded the set TTL
   // ! need to implement this without requiring --ttl
-  #[structopt(long, default_value = "-1", help = "Set Time to live (TTL) and report packets that have exceeded the TTL")]
-  ttl: i32,
+  #[structopt(short, long, default_value = "255", help = "Set Time to live (TTL) and report packets that have exceeded the TTL")]
+  ttl: u8,
 
   // Terminate after sending (and receiving) count ECHO_RESPONSE packets.
   #[structopt(short = "c", long = "count", default_value = "-1", help = "Terminates after sending (and receiving) count ECHO_RESPONSE packets")]
@@ -30,7 +30,7 @@ fn main() {
 
     // experimental implementation provided by fastping_rs documentation
     env_logger::init();
-    let (pinger, results) = match ping_util_rs::Pinger::new(None, Some(64)) {
+    let (pinger, results) = match ping_util_rs::Pinger::new(None, Some(16), Some(opt.ttl), opt.ip.is_ipv4()) {
         Ok((pinger, results)) => (pinger, results),
         Err(e) => panic!("Error creating pinger: {}", e)
     };
@@ -38,18 +38,24 @@ fn main() {
 
     pinger.add_ipaddr(&opt.ip.to_string());
     pinger.run_pinger();
-    let send_size: i32 = pinger.get_size();
+    // add 8 for the ICMP header size (8 bytes)
+    let send_size: i32 = pinger.get_size() + 8;
 
+    let mut icmp_seq: i32 = 0;
+    
+    println!("PING {} ({}): {} data bytes", opt.ip, opt.ip, pinger.get_size());
+    
     loop {
-      println!("Looping...");
+      // println!("Looping...");
+      icmp_seq += 1;
         match results.recv() {
             Ok(result) => {
                 match result {
                     ping_util_rs::PingResult::Idle{addr} => {
-                        log::error!("Idle Address {}.", addr);
+                        log::error!("TTL Time Exceeded from {}: icmp_seq={} payload={}B", addr, icmp_seq, send_size);
                     },
                     ping_util_rs::PingResult::Receive{addr, rtt} => {
-                        println!("{} bytes received from Address {} in {:?}.", send_size, addr, rtt);
+                        println!("{} bytes from {}: icmp_seq={} ttl={} rtt={:?}.", send_size, addr, icmp_seq, opt.ttl, rtt);
                     }
                 }
             },

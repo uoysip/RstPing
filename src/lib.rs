@@ -66,22 +66,32 @@ pub struct Pinger {
 
 impl Pinger {
     // initialize the pinger and start the icmp and icmpv6 listeners
-    pub fn new(_max_rtt: Option<u64>, _size: Option<i32>) -> NewPingerResult {
+    pub fn new(_max_rtt: Option<u64>, _size: Option<i32>, _ttl: Option<u8>, _ipv4_type: bool) -> NewPingerResult {
         let addrs = BTreeMap::new();
         let (sender, receiver) = channel();
 
         let protocol = Layer4(Ipv4(IpNextHeaderProtocols::Icmp));
-        let (tx, rx) = match transport_channel(4096, protocol) {
+        let (mut tx, rx) = match transport_channel(4096, protocol) {
             Ok((tx, rx)) => (tx, rx),
             Err(e) => return Err(e.to_string()),
         };
 
         let protocolv6 = Layer4(Ipv6(IpNextHeaderProtocols::Icmpv6));
-        let (txv6, rxv6) = match transport_channel(4096, protocolv6) {
+        let (mut txv6, rxv6) = match transport_channel(4096, protocolv6) {
             Ok((txv6, rxv6)) => (txv6, rxv6),
             Err(e) => return Err(e.to_string()),
         };
 
+        // TODO: Make the successful catch-all match a debug statement instead of a println!
+        // TODO: CATCH ERRORS WHEN SETTING TTL (ipv4, ipv6)
+        if let Some(ttl_value) = _ttl {
+            if _ipv4_type {
+                tx.set_ttl(ttl_value);
+            } else {
+                txv6.set_ttl(ttl_value);
+            }
+        }
+        
         let (thread_tx, thread_rx) = channel();
 
         let mut pinger = Pinger{
