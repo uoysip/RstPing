@@ -2,6 +2,8 @@
 
 RstPing is a highly performant CLI ping utility meant to offer similar functionality to the UNIX `ping` command. This program was developed for the 2020 [Cloudflare Internship Application: Systems challenge](https://github.com/cloudflare-internship-2020/internship-application-systems).
 
+![RstPing CLI](https://i.imgur.com/A0V6y2y.png)
+
 ## Installation
 
 A release-optimized executable is avaiable on the [releases page](https://github.com/uoysip/ping-util-rs/releases), as well as source code for the latest version. If you would like to build the latest version yourself, follow the commands below:
@@ -13,6 +15,7 @@ sudo cargo run -- --help
 ```
 
 ## Usage
+Due to the nature of the program `sudo` is required (unless special permissions for the executable is set).
 
 ```
 USAGE:
