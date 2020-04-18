@@ -55,7 +55,8 @@ fn std_deviation(data: &Vec<f32>) -> Option<f32> {
 // used to provide statistics on the pinging session
 pub fn summary(_opt: &Opt, _icmp_seq: u32, _failed_packets: u32, _rtt_vec: &Vec<f32>) {
   println!("\n--- {} ping statistics ---", _opt.ip);
-  println!("{} packets transmitted, {} packets received, {:.3?}% packet loss", _icmp_seq, (_icmp_seq - _failed_packets), ((_failed_packets/_icmp_seq)*100));
+  let packet_loss: f32 = (_failed_packets as f32/_icmp_seq as f32)*100.0; 
+  println!("{} packets transmitted, {} packets received, {:.3?}% packet loss", _icmp_seq, (_icmp_seq - _failed_packets), packet_loss);
   println!("round-trip min/avg/max/stddev = {:.3?}/{:.3?}/{:.3?}/{:.3?} ms", _rtt_vec.first().unwrap(), mean(_rtt_vec).unwrap(), _rtt_vec.iter().last().unwrap(), std_deviation(_rtt_vec).unwrap());
 }
 
@@ -92,12 +93,13 @@ fn main() {
             match result {
                 // case: no response from the IP address
                 rst_ping::PingResult::Idle{addr} => {
-                    log::error!("TTL Time Exceeded from {}: icmp_seq={} payload={}B", addr, icmp_seq, send_size);
                     failed_packets += 1;
+                    let packet_loss: f32 = (failed_packets as f32/icmp_seq as f32) * 100.0;
+                    println!("Request Timeout: TTL exceeded for {}: icmp_seq={} packet_size={}B loss={:.3?}%", addr, icmp_seq, send_size, packet_loss);
                 },
                 // case: response received from the IP address
                 rst_ping::PingResult::Receive{addr, rtt} => {
-                    println!("{} bytes from {}: icmp_seq={} ttl={} rtt={:.5?} loss={}%", send_size, addr, icmp_seq, opt.ttl, rtt, ((failed_packets/icmp_seq)*100));
+                    println!("{} bytes from {}: icmp_seq={} ttl={} rtt={:.3?} loss={:.3?}%", send_size, addr, icmp_seq, opt.ttl, rtt, ((failed_packets as f32/icmp_seq as f32)*100.0));
                     rtt_vec.push(rtt.as_secs_f32() * 1000 as f32);
                 }
             }
