@@ -281,7 +281,7 @@ mod tests {
         // test we can create a new pinger with optional arguments,
         // test it returns the new pinger and a client channel
         // test we can use the client channel
-        match Pinger::new(Some(3000 as u64), Some(24 as i32)) {
+        match Pinger::new(Some(3000 as u64), Some(24 as i32), Some(16 as u8), true) {
             Ok((test_pinger, test_channel)) => {
                 assert_eq!(test_pinger.max_rtt, Arc::new(Duration::new(3, 0)));
                 assert_eq!(test_pinger.size, 24 as i32);
@@ -312,7 +312,7 @@ mod tests {
 
     #[test]
     fn test_add_remove_addrs() {
-        match Pinger::new(None, None) {
+        match Pinger::new(None, None, Some(16 as u8), true) {
             Ok((test_pinger, _)) => {
                 test_pinger.add_ipaddr("127.0.0.1");
                 assert_eq!(test_pinger.addrs.lock().unwrap().len(), 1);
@@ -331,7 +331,7 @@ mod tests {
 
     #[test]
     fn test_stop() {
-        match Pinger::new(None, None) {
+        match Pinger::new(None, None, Some(16 as u8), true) {
             Ok((test_pinger, _)) => {
                 assert_eq!(*test_pinger.stop.lock().unwrap(), false);
                 test_pinger.stop_pinger();
@@ -347,7 +347,7 @@ mod tests {
     #[test]
     fn test_integration() {
         // more comprehensive integration test
-        match Pinger::new(None, None) {
+        match Pinger::new(None, None, Some(16 as u8), true) {
             Ok((test_pinger, test_channel)) => {
                 let test_addrs = vec!["127.0.0.1", "7.7.7.7", "::1"];
                 for addr in test_addrs.iter() {

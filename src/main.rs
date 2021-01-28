@@ -117,3 +117,40 @@ fn main() {
   rtt_vec.sort_by(|a, b| a.partial_cmp(b).unwrap());
   summary(&opt, icmp_seq, failed_packets, &rtt_vec);
 }
+
+
+#[test]
+fn test_std_deviation() {
+  let mut number_vec: Vec<f32> = vec![0.0,10.0];
+  assert_eq!(std_deviation(&number_vec).unwrap(), 5 as f32);
+
+  number_vec = vec![-50.0, -10.0, -5.0, 0.0, 5.0, 10.0, 50.0];
+  assert_eq!(std_deviation(&number_vec).unwrap(), 27.386127875258);
+
+  number_vec = vec![-51437.0, -10.0, -5.0, 0.0, 5.0, 25633.0, 50.0];
+  assert_eq!(std_deviation(&number_vec).unwrap(), 21407.582320671);
+
+  number_vec = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
+  assert_eq!(std_deviation(&number_vec).unwrap(), 3.1622776601684);
+
+  number_vec = vec![0.0, 3.0, 4.0, 5.0, 6.0, 9.0];
+  assert_eq!(std_deviation(&number_vec).unwrap(), 2.7537852736431);
+}
+
+#[test]
+fn test_mean() {
+  let mut number_vec: Vec<f32> = vec![0.0,10.0];
+  assert_eq!(mean(&number_vec).unwrap(), 5 as f32);
+
+  number_vec = vec![-50.0, -10.0, -5.0, 0.0, 5.0, 10.0, 50.0];
+  assert_eq!(mean(&number_vec).unwrap(), 0 as f32);
+
+  number_vec = vec![-51437.0, -10.0, -5.0, 0.0, 5.0, 25633.0, 50.0];
+  assert_eq!(mean(&number_vec).unwrap(), -3680.5714285714);
+
+  number_vec = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
+  assert_eq!(mean(&number_vec).unwrap(), 5 as f32);
+
+  number_vec = vec![0.0, 3.0, 4.0, 5.0, 6.0, 9.0];
+  assert_eq!(mean(&number_vec).unwrap(), 4.5 as f32);
+}
