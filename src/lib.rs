@@ -1,19 +1,18 @@
 mod ping;
 
+use crate::ping::send_pings;
 use pnet::packet::ip::IpNextHeaderProtocols;
-use pnet::transport::{icmp_packet_iter, icmpv6_packet_iter};
 use pnet::transport::transport_channel;
-use pnet::transport::{TransportSender, TransportReceiver};
 use pnet::transport::TransportChannelType::Layer4;
 use pnet::transport::TransportProtocol::{Ipv4, Ipv6};
-use std::net::{IpAddr};
-use crate::ping::{send_pings};
-use std::time::{Duration, Instant};
+use pnet::transport::{icmp_packet_iter, icmpv6_packet_iter};
+use pnet::transport::{TransportReceiver, TransportSender};
 use std::collections::BTreeMap;
-use std::sync::mpsc::{channel, Sender, Receiver};
-use std::thread;
+use std::net::IpAddr;
+use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::{Arc, Mutex, RwLock};
-
+use std::thread;
+use std::time::{Duration, Instant};
 
 // result type returned by fastping_rs::Pinger::new()
 pub type NewPingerResult = Result<(Pinger, Receiver<PingResult>), String>;
@@ -21,8 +20,8 @@ pub type NewPingerResult = Result<(Pinger, Receiver<PingResult>), String>;
 // ping result type.  Idle represents pings that have not received a repsonse within the max_rtt.
 // Receive represents pings which have received a repsonse
 pub enum PingResult {
-    Idle{addr: IpAddr},
-    Receive{addr: IpAddr, rtt: Duration},
+    Idle { addr: IpAddr },
+    Receive { addr: IpAddr, rtt: Duration },
 }
 
 pub struct Pinger {
@@ -66,7 +65,12 @@ pub struct Pinger {
 
 impl Pinger {
     // initialize the pinger and start the icmp and icmpv6 listeners
-    pub fn new(_max_rtt: Option<u64>, _size: Option<i32>, _ttl: Option<u8>, _ipv4_type: bool) -> NewPingerResult {
+    pub fn new(
+        _max_rtt: Option<u64>,
+        _size: Option<i32>,
+        _ttl: Option<u8>,
+        _ipv4_type: bool,
+    ) -> NewPingerResult {
         let addrs = BTreeMap::new();
         let (sender, receiver) = channel();
 
@@ -99,7 +103,7 @@ impl Pinger {
 
         let (thread_tx, thread_rx) = channel();
 
-        let mut pinger = Pinger{
+        let mut pinger = Pinger {
             max_rtt: Arc::new(Duration::from_millis(1000)),
             addrs: Arc::new(Mutex::new(addrs)),
             size: 16,
@@ -139,7 +143,7 @@ impl Pinger {
             }
             Err(e) => {
                 log::error!("Error adding ip address {}. Error: {}", ipaddr, e);
-            },
+            }
         };
     }
 
@@ -153,7 +157,7 @@ impl Pinger {
             }
             Err(e) => {
                 log::error!("Error removing ip address {}. Error: {}", ipaddr, e);
-            },
+            }
         };
     }
 
@@ -193,12 +197,30 @@ impl Pinger {
                 *stop = false;
             }
         }
-        
+
         if run_once {
-            send_pings(timer, stop, results_sender, thread_rx, tx, txv6, addrs, max_rtt);
+            send_pings(
+                timer,
+                stop,
+                results_sender,
+                thread_rx,
+                tx,
+                txv6,
+                addrs,
+                max_rtt,
+            );
         } else {
-            thread::spawn(move ||{
-                send_pings(timer, stop, results_sender, thread_rx, tx, txv6, addrs, max_rtt);
+            thread::spawn(move || {
+                send_pings(
+                    timer,
+                    stop,
+                    results_sender,
+                    thread_rx,
+                    tx,
+                    txv6,
+                    addrs,
+                    max_rtt,
+                );
             });
         }
     }
@@ -219,15 +241,18 @@ impl Pinger {
                 match iter.next() {
                     Ok((_, addr)) => {
                         let start_time = timer.read().unwrap();
-                        match thread_tx.send(PingResult::Receive{addr: addr, rtt: Instant::now().duration_since(*start_time)}) {
-                            Ok(_) => {},
+                        match thread_tx.send(PingResult::Receive {
+                            addr: addr,
+                            rtt: Instant::now().duration_since(*start_time),
+                        }) {
+                            Ok(_) => {}
                             Err(e) => {
                                 if !*stop.lock().unwrap() {
                                     log::error!("Error sending ping result on channel: {}", e)
                                 }
                             }
                         }
-                    },
+                    }
                     Err(e) => {
                         log::error!("An error occurred while reading: {}", e);
                     }
@@ -248,15 +273,18 @@ impl Pinger {
                 match iter.next() {
                     Ok((_, addr)) => {
                         let start_time = timerv6.read().unwrap();
-                        match thread_txv6.send(PingResult::Receive{addr: addr, rtt: Instant::now().duration_since(*start_time)}) {
-                            Ok(_) => {},
+                        match thread_txv6.send(PingResult::Receive {
+                            addr: addr,
+                            rtt: Instant::now().duration_since(*start_time),
+                        }) {
+                            Ok(_) => {}
                             Err(e) => {
                                 if !*stopv6.lock().unwrap() {
                                     log::error!("Error sending ping result on channel: {}", e)
                                 }
                             }
                         }
-                    },
+                    }
                     Err(e) => {
                         log::error!("An error occurred while reading: {}", e);
                     }
@@ -286,23 +314,21 @@ mod tests {
                 assert_eq!(test_pinger.max_rtt, Arc::new(Duration::new(3, 0)));
                 assert_eq!(test_pinger.size, 24 as i32);
 
-                match test_pinger.results_sender.send(PingResult::Idle{addr: "127.0.0.1".parse::<IpAddr>().unwrap()}) {
-                    Ok(_) => {
-                        match test_channel.recv() {
-                            Ok(result) => {
-                                match result {
-                                    PingResult::Idle{addr} => {
-                                        assert_eq!(addr, "127.0.0.1".parse::<IpAddr>().unwrap());
-                                    },
-                                    _ => {}
-                                }
-                            },
-                            Err(_) => assert!(false),
-                        }
-                    }
-                    Err(_) => assert!(false)
+                match test_pinger.results_sender.send(PingResult::Idle {
+                    addr: "127.0.0.1".parse::<IpAddr>().unwrap(),
+                }) {
+                    Ok(_) => match test_channel.recv() {
+                        Ok(result) => match result {
+                            PingResult::Idle { addr } => {
+                                assert_eq!(addr, "127.0.0.1".parse::<IpAddr>().unwrap());
+                            }
+                            _ => {}
+                        },
+                        Err(_) => assert!(false),
+                    },
+                    Err(_) => assert!(false),
                 }
-            },
+            }
             Err(e) => {
                 println!("Test failed: {}", e);
                 assert!(false)
@@ -316,11 +342,22 @@ mod tests {
             Ok((test_pinger, _)) => {
                 test_pinger.add_ipaddr("127.0.0.1");
                 assert_eq!(test_pinger.addrs.lock().unwrap().len(), 1);
-                assert!(test_pinger.addrs.lock().unwrap().contains_key(&"127.0.0.1".parse::<IpAddr>().unwrap()));
+                assert!(test_pinger
+                    .addrs
+                    .lock()
+                    .unwrap()
+                    .contains_key(&"127.0.0.1".parse::<IpAddr>().unwrap()));
 
                 test_pinger.remove_ipaddr("127.0.0.1");
                 assert_eq!(test_pinger.addrs.lock().unwrap().len(), 0);
-                assert_eq!(test_pinger.addrs.lock().unwrap().contains_key(&"127.0.0.1".parse::<IpAddr>().unwrap()), false);
+                assert_eq!(
+                    test_pinger
+                        .addrs
+                        .lock()
+                        .unwrap()
+                        .contains_key(&"127.0.0.1".parse::<IpAddr>().unwrap()),
+                    false
+                );
             }
             Err(e) => {
                 println!("Test failed: {}", e);
@@ -356,19 +393,17 @@ mod tests {
                 test_pinger.ping_once();
                 for _ in test_addrs.iter() {
                     match test_channel.recv() {
-                        Ok(result) => {
-                            match result {
-                                PingResult::Idle{addr} => {
-                                    assert_eq!("7.7.7.7".parse::<IpAddr>().unwrap(), addr);
-                                },
-                                PingResult::Receive{addr, rtt: _} => {
-                                    if addr == "::1".parse::<IpAddr>().unwrap() {
-                                        assert!(true)
-                                    } else if addr == "127.0.0.1".parse::<IpAddr>().unwrap() {
-                                        assert!(true)
-                                    } else {
-                                        assert!(false)
-                                    }
+                        Ok(result) => match result {
+                            PingResult::Idle { addr } => {
+                                assert_eq!("7.7.7.7".parse::<IpAddr>().unwrap(), addr);
+                            }
+                            PingResult::Receive { addr, rtt: _ } => {
+                                if addr == "::1".parse::<IpAddr>().unwrap() {
+                                    assert!(true)
+                                } else if addr == "127.0.0.1".parse::<IpAddr>().unwrap() {
+                                    assert!(true)
+                                } else {
+                                    assert!(false)
                                 }
                             }
                         },
